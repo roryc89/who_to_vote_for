@@ -31,25 +31,29 @@ def set_nas(cell):
 
 weekly_mean_earnings = (
     weekly_mean_earnings[weekly_mean_earnings.year.apply(is_int)]
-    .set_index("year", drop=False)
+    .set_index("year")
     .applymap(set_nas)
 )
 
 inflation = pd.read_csv("uk/data/parsed/inflation.csv")
 weekly_mean_earnings = pd.merge(weekly_mean_earnings, inflation, on="year")
 
-weekly_mean_earnings["male_inflation_adjusted"] = (
+weekly_mean_earnings.male = (
     weekly_mean_earnings.male * weekly_mean_earnings.multiplier
 )
 
-weekly_mean_earnings["female_inflation_adjusted"] = (
+weekly_mean_earnings.female = (
     weekly_mean_earnings.female * weekly_mean_earnings.multiplier
 )
 
-weekly_mean_earnings["both_inflation_adjusted"] = (
+weekly_mean_earnings.both = (
     weekly_mean_earnings.both * weekly_mean_earnings.multiplier
 )
+weekly_mean_earnings = weekly_mean_earnings.drop(
+    columns=["multiplier", "inflation"]
+)
 weekly_mean_earnings
+weekly_mean_earnings.to_csv("uk/data/parsed/median_earnings.csv")
 # get_inflation_adjusted = (
 #     lambda col: lambda row: inflation[row.year, "multiplier"] * row[col]
 # )
