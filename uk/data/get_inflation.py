@@ -18,7 +18,7 @@ def get_df_row(row):
     return {
         "year": int(cells[0].text),
         "inflation": float(re.sub("%", "", cells[1].text or "0")),
-        "multiplier": float(cells[2].text or 0),
+        "multiplier": float(cells[2].text or 1),
     }
 
 
