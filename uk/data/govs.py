@@ -1,7 +1,4 @@
-from bs4 import BeautifulSoup
 import pandas as pd
-import re
-import requests
 
 # found at https://en.wikipedia.org/wiki/List_of_Prime_Ministers_of_the_United_Kingdom#Since_1721"
 # it was far easier to copy these than parse the html

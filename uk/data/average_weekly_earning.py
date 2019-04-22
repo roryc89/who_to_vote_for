@@ -29,6 +29,11 @@ def set_nas(cell):
         return np.nan
 
 
+weekly_mean_earnings = weekly_mean_earnings.drop_duplicates(
+    subset="year", keep="first"
+)
+
+
 weekly_mean_earnings = (
     weekly_mean_earnings[weekly_mean_earnings.year.apply(is_int)]
     .set_index("year")
@@ -54,10 +59,3 @@ weekly_mean_earnings = weekly_mean_earnings.drop(
 )
 weekly_mean_earnings
 weekly_mean_earnings.to_csv("uk/data/parsed/median_earnings.csv")
-# get_inflation_adjusted = (
-#     lambda col: lambda row: inflation[row.year, "multiplier"] * row[col]
-# )
-# weekly_mean_earnings
-# weekly_mean_earnings.male_inflation_adjusted = weekly_mean_earnings.apply(
-#     get_inflation_adjusted("male"), axis=1
-# )
