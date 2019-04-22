@@ -24,6 +24,10 @@ violent_crime_df = pd.read_csv(
     "usa/data/parsed/violent_crime_rate.csv", index_col="year"
 ).drop(columns=["Unnamed: 0"])
 
+national_debt_df = pd.read_csv(
+    "usa/data/parsed/national_debt.csv", index_col="year"
+).drop(columns=["Unnamed: 0"])
+
 presidents_df["start_year"] = presidents_df.start_date.apply(
     lambda d: dateutil.parser.parse(d).year
 )
@@ -36,8 +40,14 @@ for year in range(1967, 2016):
     president = presidents_df[presidents_df.start_year <= year].iloc[0]
 
     # we increase the year by to offset changes due to previous administration
-    median_income = incomes_df.loc[year + 1, :]
-    violent_crime_rate = violent_crime_df.loc[year + 1].violent_crime_rate
+    result_shift = 1
+    median_income = incomes_df.loc[year + result_shift, :]
+
+    violent_crime_rate = violent_crime_df.loc[
+        year + result_shift
+    ].violent_crime_rate
+
+    national_debt = national_debt_df.loc[year + result_shift].national_debt
 
     senate_rep_over_dem = (
         congress.senate_republicans / congress.senate_democrats
@@ -57,6 +67,7 @@ for year in range(1967, 2016):
             "year": year,
             "median_income": median_income.income,
             "violent_crime_rate": violent_crime_rate,
+            "national_debt": national_debt,
             "president_dem": president.party == "Democratic",
             "president_rep": president.party == "Republican",
             "senate_rep_over_dem": senate_rep_over_dem,
@@ -84,12 +95,44 @@ df = pd.DataFrame(data).set_index("year", drop=False)
 
 df["median_income_diff"] = df.median_income.diff()
 df["violent_crime_rate_diff"] = df.violent_crime_rate.diff()
-
+df["national_debt_diff"] = df.national_debt.diff()
 
 sns.lineplot(x="year", y="median_income", data=df)
 
+sns.lineplot(x="year", y="violent_crime_rate", data=df)
+
+sns.lineplot(x="year", y="national_debt", data=df)
+
+aggs = {
+    "median_income_diff": "mean",
+    "violent_crime_rate_diff": "mean",
+    "national_debt_diff": "mean",
+}
+
+cols = [
+    "president_rep",
+    "more_reps_than_dems_in_house",
+    "more_reps_than_dems_in_senate",
+]
+
+list(map(lambda col: df.groupby(col).agg(aggs), cols))
+
+df.groupby(
+    [
+        "president_rep",
+        "more_reps_than_dems_in_house",
+        "more_reps_than_dems_in_senate",
+    ]
+).agg(aggs)
+
 df[df.president_dem].median_income_diff.mean()
 df[df.president_rep].median_income_diff.mean()
+
+df[df.president_dem].violent_crime_rate_diff.mean()
+df[df.president_rep].violent_crime_rate_diff.mean()
+
+df[df.president_dem].national_debt_diff.mean()
+df[df.president_rep].national_debt_diff.mean()
 
 df[df.more_reps_than_dems_in_house].median_income_diff.mean()
 df[~df.more_reps_than_dems_in_house].median_income_diff.mean()
