@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
-from scipy import stats
 import matplotlib.pyplot as plt
-import matplotlib.collections as collections
 
 govs_raw = pd.read_csv("uk/data/parsed/govs.csv").sort_values(
     ["year", "month"], ascending=False
@@ -63,29 +61,45 @@ earnings_df["both_annual_diff"] = earnings_diff.both * 52 * 12
 earnings_df["is_labour"] = (earnings_df.party == "Labour").astype("float")
 earnings_df["is_conservative"] = earnings_df.party == "Conservative"
 
-ax = earnings_df.plot.line("year", ["male"])
+for gender in ["male", "female"]:
+    ax = earnings_df.plot.line("year", gender)
 
-plt.xlabel("year")
-plt.ylabel("change in earnings")
+    plt.xlabel("year")
+    plt.ylabel(gender + " earnings")
 
-plt.title("Change in annual male median earnings, inflation adjusted")
+    plt.title("Weekly median earnings, inflation adjusted")
 
-ax.pcolorfast(
-    ax.get_xlim(),
-    ax.get_ylim(),
-    earnings_df["is_labour"].values[np.newaxis],
-    cmap="RdYlGn",
-    alpha=0.3,
-)
+    ax.pcolorfast(
+        ax.get_xlim(),
+        ax.get_ylim(),
+        earnings_df["is_labour"].values[np.newaxis],
+        cmap="RdYlGn",
+        alpha=0.3,
+    )
 
-plt.legend()
+    plt.legend()
 
-plt.show()
+    plt.show()
 
+for gender in ["male_annual_diff", "female_annual_diff"]:
+    ax = earnings_df.plot.line("year", gender)
 
-earnings_df[earnings_df.party == "Labour"].male_annual_diff.mean()
-earnings_df[earnings_df.party == "Conservative"].male_annual_diff.mean()
+    plt.xlabel("year")
+    plt.ylabel(gender)
 
+    plt.title("Annual median earnings change, inflation adjusted")
 
-earnings_df[earnings_df.party == "Labour"].female_annual_diff.mean()
-earnings_df[earnings_df.party == "Conservative"].female_annual_diff.mean()
+    ax.pcolorfast(
+        ax.get_xlim(),
+        ax.get_ylim(),
+        earnings_df["is_labour"].values[np.newaxis],
+        cmap="RdYlGn",
+        alpha=0.3,
+    )
+
+    plt.legend()
+
+    plt.show()
+
+    earnings_df[earnings_df.party == "Labour"][gender].mean()
+    earnings_df[earnings_df.party == "Conservative"][gender].mean()
